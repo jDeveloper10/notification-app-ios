@@ -1,0 +1,90 @@
+name: Compilar IPA (iOS)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      build_configuration:
+        description: 'Configuración de compilación'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+          - Debug
+
+jobs:
+  build-ios:
+    name: Compilar IPA de iOS
+    runs-on: macos-14
+
+    steps:
+      - name: 1. Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 3. Instalar dependencias npm
+        run: |
+          npm install --legacy-peer-deps
+
+      - name: 4. Seleccionar versión de Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode_15.2.app || true
+          xcodebuild -version
+
+      - name: 5. Cache de CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile*') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: 6. Configurar entorno Xcode para Node y CocoaPods
+        run: |
+          echo "export NODE_BINARY=$(which node)" > ios/.xcode.env.local
+          cat ios/.xcode.env.local
+          cd ios
+          pod install --repo-update || pod install
+          cd ..
+
+      - name: 7. Compilar y archivar (xcodebuild archive)
+        env:
+          CONFIG: ${{ inputs.build_configuration || 'Release' }}
+        run: |
+          mkdir -p build
+          xcodebuild archive \
+            -workspace ios/NotificationApp.xcworkspace \
+            -scheme NotificationApp \
+            -configuration "$CONFIG" \
+            -sdk iphoneos \
+            -archivePath "$PWD/build/NotificationApp.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            COMPILER_INDEX_STORE_ENABLE=NO
+
+      - name: 8. Empaquetar archivo .ipa
+        run: |
+          mkdir -p build/Payload
+          cp -R "build/NotificationApp.xcarchive/Products/Applications/NotificationApp.app" build/Payload/
+          cd build
+          zip -r -y NotificationApp.ipa Payload
+          ls -lh NotificationApp.ipa
+          cd ..
+
+      - name: 9. Subir artefacto IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: NotificationApp-iOS-IPA
+          path: build/NotificationApp.ipa
+          retention-days: 30
