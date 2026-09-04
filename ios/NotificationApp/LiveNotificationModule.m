@@ -10,16 +10,23 @@ RCT_EXTERN_METHOD(sendStandardNotification:(NSString *)title
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(startLiveActivity:(NSString *)restaurantName
+RCT_EXTERN_METHOD(startLiveActivity:(NSString *)scenarioType
+                  title:(NSString *)title
                   status:(NSString *)status
+                  subtitle:(NSString *)subtitle
                   timeRange:(NSString *)timeRange
-                  step:(nonnull NSNumber *)step
+                  currentStep:(nonnull NSNumber *)currentStep
+                  totalSteps:(nonnull NSNumber *)totalSteps
+                  badgeText:(NSString *)badgeText
+                  accentColor:(NSString *)accentColor
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(updateLiveActivity:(NSString *)status
+                  subtitle:(NSString *)subtitle
                   timeRange:(NSString *)timeRange
-                  step:(nonnull NSNumber *)step
+                  currentStep:(nonnull NSNumber *)currentStep
+                  badgeText:(NSString *)badgeText
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 

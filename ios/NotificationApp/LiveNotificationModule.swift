@@ -43,7 +43,7 @@ class LiveNotificationModule: NSObject, RCTBridgeModule {
         }
     }
 
-    // MARK: - 1. Notificación Estándar (Estilo PedidosYa)
+    // MARK: - 1. Notificación Estándar
     @objc
     func sendStandardNotification(
         _ title: String,
@@ -53,36 +53,54 @@ class LiveNotificationModule: NSObject, RCTBridgeModule {
     ) {
         let center = UNUserNotificationCenter.current()
 
-        let content = UNMutableNotificationContent()
-        content.title = title.isEmpty ? "PedidosYa" : title
-        content.body = body.isEmpty ? "El local ya recibió tu pedido. Te llegará entre las 12:40 - 1:00." : body
-        content.sound = .default
-
-        // Trigger after 1 second
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-
-        center.add(request) { error in
+        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error {
-                reject("NOTIF_ERROR", "Error scheduling notification: \(error.localizedDescription)", error)
-            } else {
-                resolve(["success": true, "message": "Notificación estándar programada"])
+                reject("PERM_ERROR", "Error de permisos: \(error.localizedDescription)", error)
+                return
+            }
+
+            guard granted else {
+                reject("NOT_PERMITTED", "Permiso de notificaciones denegado. Ve a Ajustes > NotificationApp > Notificaciones y actívalas.", nil)
+                return
+            }
+
+            let content = UNMutableNotificationContent()
+            content.title = title.isEmpty ? "Notificación" : title
+            content.body = body.isEmpty ? "Nueva alerta recibida" : body
+            content.sound = .default
+            content.badge = 1
+
+            // Disparar en 1 segundo
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+
+            center.add(request) { error in
+                if let error = error {
+                    reject("NOTIF_ERROR", "Error al programar: \(error.localizedDescription)", error)
+                } else {
+                    resolve(["success": true, "message": "Notificación estándar programada"])
+                }
             }
         }
     }
 
-    // MARK: - 2. Live Activity (Estilo Sushi Express con ActivityKit)
+    // MARK: - 2. Live Activity Multipropósito (Trading, Grúas, Pareja, Delivery)
     @objc
     func startLiveActivity(
-        _ restaurantName: String,
+        _ scenarioType: String,
+        title: String,
         status: String,
+        subtitle: String,
         timeRange: String,
-        step: NSNumber,
+        currentStep: NSNumber,
+        totalSteps: NSNumber,
+        badgeText: String,
+        accentColor: String,
         resolver resolve: @escaping RCTPromiseResolveBlock,
         rejecter reject: @escaping RCTPromiseRejectBlock
     ) {
         guard #available(iOS 16.1, *) else {
-            reject("UNSUPPORTED_VERSION", "Live Activities requieren iOS 16.1 o superior", nil)
+            reject("UNSUPPORTED_VERSION", "Live Activities requieren iOS 16.1+", nil)
             return
         }
 
@@ -91,18 +109,24 @@ class LiveNotificationModule: NSObject, RCTBridgeModule {
             return
         }
 
-        let restaurant = restaurantName.isEmpty ? "Sushi Express - Costa Verde" : restaurantName
-        let currentStatus = status.isEmpty ? "El local recibió tu pedido" : status
-        let time = timeRange.isEmpty ? "12:40 - 1:00" : timeRange
-        let stepNumber = step.intValue > 0 ? step.intValue : 1
+        // Si ya hay una actividad previa, cerrarla antes de abrir una nueva
+        Task {
+            for oldActivity in Activity<DeliveryAttributes>.activities {
+                await oldActivity.end(dismissalPolicy: .immediate)
+            }
+        }
 
-        let attributes = DeliveryAttributes(restaurantName: restaurant)
+        let attributes = DeliveryAttributes(restaurantName: title)
         let initialContentState = DeliveryAttributes.ContentState(
-            status: currentStatus,
-            timeRange: time,
-            onTimeStatus: "A tiempo",
-            currentStep: stepNumber,
-            totalSteps: 4
+            scenarioType: scenarioType,
+            title: title,
+            status: status,
+            subtitle: subtitle,
+            timeRange: timeRange,
+            currentStep: currentStep.intValue > 0 ? currentStep.intValue : 1,
+            totalSteps: totalSteps.intValue > 0 ? totalSteps.intValue : 4,
+            badgeText: badgeText,
+            accentColor: accentColor
         )
 
         do {
@@ -125,16 +149,18 @@ class LiveNotificationModule: NSObject, RCTBridgeModule {
                 resolve(["success": true, "activityId": activity.id])
             }
         } catch {
-            reject("LIVE_ACTIVITY_ERROR", "No se pudo iniciar la Live Activity: \(error.localizedDescription)", error)
+            reject("LIVE_ACTIVITY_ERROR", "Error al iniciar Live Activity: \(error.localizedDescription)", error)
         }
     }
 
-    // MARK: - Actualizar Live Activity (Avanzar paso)
+    // MARK: - Actualizar Live Activity
     @objc
     func updateLiveActivity(
         _ status: String,
+        subtitle: String,
         timeRange: String,
-        step: NSNumber,
+        currentStep: NSNumber,
+        badgeText: String,
         resolver resolve: @escaping RCTPromiseResolveBlock,
         rejecter reject: @escaping RCTPromiseRejectBlock
     ) {
@@ -143,27 +169,22 @@ class LiveNotificationModule: NSObject, RCTBridgeModule {
             return
         }
 
-        guard let activity = self.currentActivity as? Activity<DeliveryAttributes> else {
-            // Intentar buscar una actividad activa si la referencia se perdió
-            if let firstActive = Activity<DeliveryAttributes>.activities.first {
-                self.currentActivity = firstActive
-                self.updateLiveActivity(status, timeRange: timeRange, step: step, resolver: resolve, rejecter: reject)
-                return
-            }
-            reject("NO_ACTIVITY", "No hay ninguna Live Activity activa para actualizar", nil)
+        guard let activity = (self.currentActivity as? Activity<DeliveryAttributes>) ?? Activity<DeliveryAttributes>.activities.first else {
+            reject("NO_ACTIVITY", "No hay Live Activity activa para actualizar", nil)
             return
         }
 
-        let updatedStatus = status.isEmpty ? "Preparando tu pedido" : status
-        let time = timeRange.isEmpty ? "12:40 - 1:00" : timeRange
-        let stepNumber = step.intValue
-
+        let prevState = activity.content.state
         let updatedContentState = DeliveryAttributes.ContentState(
-            status: updatedStatus,
-            timeRange: time,
-            onTimeStatus: "A tiempo",
-            currentStep: stepNumber,
-            totalSteps: 4
+            scenarioType: prevState.scenarioType,
+            title: prevState.title,
+            status: status.isEmpty ? prevState.status : status,
+            subtitle: subtitle.isEmpty ? prevState.subtitle : subtitle,
+            timeRange: timeRange.isEmpty ? prevState.timeRange : timeRange,
+            currentStep: currentStep.intValue,
+            totalSteps: prevState.totalSteps,
+            badgeText: badgeText.isEmpty ? prevState.badgeText : badgeText,
+            accentColor: prevState.accentColor
         )
 
         Task {
@@ -173,7 +194,7 @@ class LiveNotificationModule: NSObject, RCTBridgeModule {
             } else {
                 await activity.update(using: updatedContentState)
             }
-            resolve(["success": true, "step": stepNumber])
+            resolve(["success": true, "step": currentStep.intValue])
         }
     }
 
