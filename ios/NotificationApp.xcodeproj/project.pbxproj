@@ -21,7 +21,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		76E100012C12345600000001 /* NotificationApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NotificationApp-Bridging-Header.h"; path = "NotificationApp/NotificationApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		76E100022C12345600000002 /* DeliveryAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DeliveryAttributes.swift; path = NotificationApp/DeliveryAttributes.swift; sourceTree = "<group>"; };
 		76E100052C12345600000005 /* LiveNotificationModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveNotificationModule.swift; path = NotificationApp/LiveNotificationModule.swift; sourceTree = "<group>"; };
 		76E100072C12345600000007 /* LiveNotificationModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = LiveNotificationModule.m; path = NotificationApp/LiveNotificationModule.m; sourceTree = "<group>"; };
@@ -87,7 +86,6 @@
 		13B07FAE1A68108700A75B9A /* NotificationApp */ = {
 			isa = PBXGroup;
 			children = (
-				76E100012C12345600000001 /* NotificationApp-Bridging-Header.h */,
 				76E100022C12345600000002 /* DeliveryAttributes.swift */,
 				76E100052C12345600000005 /* LiveNotificationModule.swift */,
 				76E100072C12345600000007 /* LiveNotificationModule.m */,
@@ -385,7 +383,6 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_OBJC_BRIDGING_HEADER = "NotificationApp/NotificationApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -415,7 +412,6 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_OBJC_BRIDGING_HEADER = "NotificationApp/NotificationApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -445,7 +441,6 @@
 				PRODUCT_NAME = NotificationApp;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_OBJC_BRIDGING_HEADER = "NotificationApp/NotificationApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -474,7 +469,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = NotificationApp;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SWIFT_OBJC_BRIDGING_HEADER = "NotificationApp/NotificationApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";

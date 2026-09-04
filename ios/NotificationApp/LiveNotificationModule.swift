@@ -1,9 +1,14 @@
 import Foundation
 import UserNotifications
 import ActivityKit
+import React
 
 @objc(LiveNotificationModule)
-class LiveNotificationModule: NSObject {
+class LiveNotificationModule: NSObject, RCTBridgeModule {
+
+    @objc static func moduleName() -> String! {
+        return "LiveNotificationModule"
+    }
 
     // Store active activity reference for live updates
     private var currentActivity: Any?
