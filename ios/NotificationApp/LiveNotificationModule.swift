@@ -180,7 +180,7 @@ class LiveNotificationModule: NSObject, RCTBridgeModule {
     // MARK: - Finalizar Live Activity
     @objc
     func endLiveActivity(
-        _ resolver: @escaping RCTPromiseResolveBlock,
+        _ resolve: @escaping RCTPromiseResolveBlock,
         rejecter reject: @escaping RCTPromiseRejectBlock
     ) {
         guard #available(iOS 16.1, *) else {
