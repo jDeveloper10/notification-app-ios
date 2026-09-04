@@ -16,7 +16,7 @@ struct DeliveryLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.leading) {
                     HStack(spacing: 6) {
                         scenarioIcon(for: context.state.scenarioType)
-                            .foregroundColor(accentColor(for: context.state.accentColor))
+                            .foregroundColor(themeColor(for: context.state.accentColor))
                             .font(.system(size: 18))
                         Text(context.state.title)
                             .font(.system(size: 13, weight: .bold))
@@ -30,7 +30,7 @@ struct DeliveryLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.trailing) {
                     Text(context.state.timeRange)
                         .font(.system(size: 13, weight: .black))
-                        .foregroundColor(accentColor(for: context.state.accentColor))
+                        .foregroundColor(themeColor(for: context.state.accentColor))
                         .padding(.trailing, 4)
                 }
 
@@ -45,7 +45,7 @@ struct DeliveryLiveActivity: Widget {
                         ProgressSegmentsView(
                             currentStep: context.state.currentStep,
                             totalSteps: context.state.totalSteps,
-                            color: accentColor(for: context.state.accentColor)
+                            color: themeColor(for: context.state.accentColor)
                         )
 
                         HStack {
@@ -57,9 +57,9 @@ struct DeliveryLiveActivity: Widget {
                                 .font(.system(size: 10, weight: .black))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(accentColor(for: context.state.accentColor).opacity(0.25))
+                                .background(themeColor(for: context.state.accentColor).opacity(0.25))
                                 .cornerRadius(4)
-                                .foregroundColor(accentColor(for: context.state.accentColor))
+                                .foregroundColor(themeColor(for: context.state.accentColor))
                         }
                     }
                     .padding(.horizontal, 4)
@@ -67,15 +67,15 @@ struct DeliveryLiveActivity: Widget {
                 }
             } compactLeading: {
                 scenarioIcon(for: context.state.scenarioType)
-                    .foregroundColor(accentColor(for: context.state.accentColor))
+                    .foregroundColor(themeColor(for: context.state.accentColor))
                     .font(.system(size: 12))
             } compactTrailing: {
                 Text(context.state.timeRange)
                     .font(.system(size: 11, weight: .black))
-                    .foregroundColor(accentColor(for: context.state.accentColor))
+                    .foregroundColor(themeColor(for: context.state.accentColor))
             } minimal: {
                 scenarioIcon(for: context.state.scenarioType)
-                    .foregroundColor(accentColor(for: context.state.accentColor))
+                    .foregroundColor(themeColor(for: context.state.accentColor))
                     .font(.system(size: 12))
             }
         }
@@ -93,7 +93,7 @@ struct ScenarioLiveActivityView: View {
                 // Badge con ícono
                 ZStack {
                     RoundedRectangle(cornerRadius: 7)
-                        .fill(accentColor(for: context.state.accentColor))
+                        .fill(themeColor(for: context.state.accentColor))
                         .frame(width: 24, height: 24)
                     scenarioIcon(for: context.state.scenarioType)
                         .font(.system(size: 12, weight: .bold))
@@ -110,13 +110,13 @@ struct ScenarioLiveActivityView: View {
                     .font(.system(size: 10, weight: .black))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(accentColor(for: context.state.accentColor).opacity(0.2))
+                    .background(themeColor(for: context.state.accentColor).opacity(0.2))
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(accentColor(for: context.state.accentColor).opacity(0.4), lineWidth: 1)
+                            .stroke(themeColor(for: context.state.accentColor).opacity(0.4), lineWidth: 1)
                     )
                     .cornerRadius(6)
-                    .foregroundColor(accentColor(for: context.state.accentColor))
+                    .foregroundColor(themeColor(for: context.state.accentColor))
             }
 
             // Cuerpo principal
@@ -135,14 +135,14 @@ struct ScenarioLiveActivityView: View {
                 Spacer()
 
                 // Ilustración lateral según escenario
-                sideIllustration(for: context.state.scenarioType, accent: accentColor(for: context.state.accentColor))
+                sideIllustration(for: context.state.scenarioType, accent: themeColor(for: context.state.accentColor))
             }
 
             // Barra de progreso
             ProgressSegmentsView(
                 currentStep: context.state.currentStep,
                 totalSteps: context.state.totalSteps,
-                color: accentColor(for: context.state.accentColor)
+                color: themeColor(for: context.state.accentColor)
             )
 
             // Footer
@@ -155,7 +155,7 @@ struct ScenarioLiveActivityView: View {
 
                 Text(context.state.timeRange)
                     .font(.system(size: 13, weight: .black))
-                    .foregroundColor(accentColor(for: context.state.accentColor))
+                    .foregroundColor(themeColor(for: context.state.accentColor))
             }
         }
         .padding(.horizontal, 16)
@@ -165,7 +165,7 @@ struct ScenarioLiveActivityView: View {
                 .fill(cardGradient(for: context.state.scenarioType))
                 .overlay(
                     RoundedRectangle(cornerRadius: 22)
-                        .stroke(accentColor(for: context.state.accentColor).opacity(0.3), lineWidth: 1)
+                        .stroke(themeColor(for: context.state.accentColor).opacity(0.3), lineWidth: 1)
                 )
         )
     }
@@ -267,7 +267,7 @@ func sideIllustration(for type: String, accent: Color) -> some View {
     }
 }
 
-func accentColor(for colorName: String) -> Color {
+func themeColor(for colorName: String) -> Color {
     switch colorName {
     case "green":
         return Color(red: 0.0, green: 0.94, blue: 0.63) // Neon green trading
